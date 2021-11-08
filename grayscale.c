@@ -48,10 +48,29 @@ double * bmp_to_grayscale(char *file_name)
         {
             fread(pixel, 3, 1, fIn);
             double gray = (pixel[0] * 0.3 + pixel[1] * 0.58 + pixel[2] * 0.11)/255;
-            grayscale_pix[x * y] = gray;
+            grayscale_pix[(y*width) + x] = gray;
         }
     }
     fclose(fIn);
 
     return grayscale_pix;
+}
+
+void matrix_to_file(char *file_name, double *matrix)
+{
+    struct dimensions dim = bmp_dimensions(file_name);
+    char output[8];
+    FILE *dataOut = fopen("data.csv", "w+");
+
+    for (int y = 0; y < dim.height; ++y)
+    {
+        for (int x = 0; x < dim.width; ++x)
+        {
+            snprintf(output, 318, "%f,", matrix[(y*dim.width) + x]);
+            fwrite(output, sizeof(double), 1, dataOut);
+            fwrite(",", sizeof(char), 1, dataOut);
+        }
+        fwrite("\n", sizeof(char), 1, dataOut);
+    }
+    fclose(dataOut);
 }

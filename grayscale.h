@@ -11,4 +11,6 @@ struct dimensions bmp_dimensions(char *file_name);
 
 double * bmp_to_grayscale(char *file_name);
 
+void matrix_to_file(char *file_name, double *matrix);
+
 #endif
