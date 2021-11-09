@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "grayscale.h"
+#include "formula.h"
 
 int main(int argc, char *argv[])
 {
@@ -14,12 +15,14 @@ int main(int argc, char *argv[])
       return 0;
     }
 
-    struct dimensions test = bmp_dimensions(input_file);
-    printf("Width = %d, Height = %d\n", test.width, test.height);
+    struct dimensions dim = bmp_dimensions(input_file);
+    printf("Width = %d, Height = %d\n", dim.width, dim.height);
 
     double *grayscale_pix = bmp_to_grayscale(input_file);
 
-    matrix_to_file(input_file, grayscale_pix);
+    double *result = sobel_edge_detection(grayscale_pix, dim);
+
+    matrix_to_file(input_file, result);
 
     return 0;
 }
