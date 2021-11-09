@@ -38,19 +38,25 @@ double * bmp_to_grayscale(char *file_name)
 
     int width = *(int*)&header[18];
     int height = abs(*(int*)&header[22]);
+    int padding = (4-((3*width)%4))%4;
 
     double *grayscale_pix = malloc(width * height * sizeof(double));
 
     unsigned char pixel[3];
+
+    fseek(fIn, 54, SEEK_SET);
+
     for (int y = 0; y < height; ++y)
     {
         for (int x = 0; x < width; ++x)
         {
-            fread(pixel, 3, 1, fIn);
-            double gray = (pixel[0] * 0.3 + pixel[1] * 0.58 + pixel[2] * 0.11)/255;
+            fread(&pixel, 3, 1, fIn);
+            double gray = (pixel[0] * 0.3 + pixel[1] * 0.58 + pixel[2] * 0.11);
             grayscale_pix[(y*width) + x] = gray;
         }
+        fseek(fIn, padding, SEEK_CUR);
     }
+
     fclose(fIn);
 
     return grayscale_pix;
