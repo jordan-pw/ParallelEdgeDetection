@@ -24,7 +24,7 @@ struct dimensions bmp_dimensions(char *file_name)
     return d;
 }
 
-double * bmp_to_grayscale(char *file_name)
+int * bmp_to_grayscale(char *file_name)
 {
     FILE *fIn = fopen(file_name, "rb");
     if (!fIn)
@@ -40,7 +40,9 @@ double * bmp_to_grayscale(char *file_name)
     int height = abs(*(int*)&header[22]);
     int padding = (4-((3*width)%4))%4;
 
-    double *grayscale_pix = malloc(width * height * sizeof(double));
+    // printf("W:%d, H:%d\n", width,height);
+
+    int *grayscale_pix = malloc(width * height * sizeof(int));
 
     unsigned char pixel[3];
 
@@ -51,7 +53,7 @@ double * bmp_to_grayscale(char *file_name)
         for (int x = 0; x < width; ++x)
         {
             fread(&pixel, 3, 1, fIn);
-            double gray = (pixel[0] * 0.3 + pixel[1] * 0.58 + pixel[2] * 0.11);
+            int gray = (pixel[0] * 0.3 + pixel[1] * 0.58 + pixel[2] * 0.11);
             grayscale_pix[(y*width) + x] = gray;
         }
         fseek(fIn, padding, SEEK_CUR);
@@ -62,18 +64,23 @@ double * bmp_to_grayscale(char *file_name)
     return grayscale_pix;
 }
 
-void matrix_to_file(char *file_name, double *matrix)
+void matrix_to_file(char *file_name, int *matrix)
 {
     struct dimensions dim = bmp_dimensions(file_name);
-    char output[8];
+    // char output[4];
     FILE *dataOut = fopen("data.csv", "w+");
 
     for (int y = 0; y < dim.height; ++y)
     {
         for (int x = 0; x < dim.width; ++x)
         {
-            snprintf(output, 318, "%f,", matrix[(y*dim.width) + x]);
-            fwrite(output, sizeof(double), 1, dataOut);
+            char output[4] = {'0','0','0','0'};
+            // snprintf(output, sizeof(char)*4, "%d", matrix[(y*dim.width) + x]);
+            output[0] = '0' + matrix[(y*dim.width) + x] / 100;
+            output[1] = '0' + (matrix[(y*dim.width) + x] % 100)/10;
+            output[2] = '0' + matrix[(y*dim.width) + x] % 10;
+            // printf("%c%c%c\n",output[0],output[1],output[2]);
+            fwrite(output, sizeof(char), 3, dataOut);
             fwrite(",", sizeof(char), 1, dataOut);
         }
         fwrite("\n", sizeof(char), 1, dataOut);

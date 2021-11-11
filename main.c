@@ -1,12 +1,25 @@
+/*
+ *  Authors:  Jordan, Dillon & Conley
+ *
+ *  Complie command:
+ *              gcc -g -Wall -o sobel main.c grayscale.c formula.c -lm
+ *  Run Command:
+ *              ./sobel <filename> 
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <mpi.h>
+// #include <omp.h>
 
 #include "grayscale.h"
 #include "formula.h"
 
 int main(int argc, char *argv[])
 {
+
     char *input_file = argv[1];
 
     if (!argv[1])
@@ -18,11 +31,20 @@ int main(int argc, char *argv[])
     struct dimensions dim = bmp_dimensions(input_file);
     printf("Width = %d, Height = %d\n", dim.width, dim.height);
 
-    double *grayscale_pix = bmp_to_grayscale(input_file);
+    //  start MPI scatter int arrays 
 
-    double *result = sobel_edge_detection(grayscale_pix, dim);
+    int *grayscale_pix = bmp_to_grayscale(input_file);
+
+    int *result = sobel_edge_detection(grayscale_pix, dim);
+
+    //  End MPI Gather int arrays
 
     matrix_to_file(input_file, result);
+
+
+
+    free(grayscale_pix);
+    free(result);
 
     return 0;
 }
